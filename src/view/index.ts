@@ -1,2 +1,4 @@
-import WelcomeScreen from "./WelcomeScreen"; 
-export { WelcomeScreen };
+import WelcomeScreen from './WelcomeScreen';
+import InfomationScreen from './InfomationScreen';
+import NotificationScreen from './NotificationScreen';
+export {WelcomeScreen, InfomationScreen, NotificationScreen };

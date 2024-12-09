@@ -3,15 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 // Only import react-native-gesture-handler on native platforms
 import 'react-native-gesture-handler';
-//screen
-import { WelcomeScreen } from './src/view';
+import StackNavigator from './src/navigator/StackNavigator';
 export default function App() {
-  return (
-    <NavigationContainer>
-      <WelcomeScreen />
-    </NavigationContainer>
-
-  );
+  return <StackNavigator />;
 }
 
 const styles = StyleSheet.create({
