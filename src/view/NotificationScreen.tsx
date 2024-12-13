@@ -16,7 +16,7 @@ const imgArrow = 'https://firebasestorage.googleapis.com/v0/b/terrianfirefly.app
 const NotificationScreen = () => {
     const navigation = useNavigation<Stack>();
     return(
-        <BackgroundComponent>
+        <BackgroundComponent>   
             <LogoComponent title='DONE' />
             <Image width={appInfo.widthWindows * 0.61} height={appInfo.widthWindows * 0.7} source={{uri: imgDone}} />
             <View style={{flexDirection: 'row', marginBottom: appInfo.heightWindows * 0.1}}>

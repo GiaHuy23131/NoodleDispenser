@@ -2,6 +2,7 @@ import * as React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 //constains
 import { appInfo } from '../constains/appInfo';
+import { appColor } from '../constains/appColor';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 //định dạng kiểu
@@ -12,7 +13,7 @@ type ButtonProps = {
 const ButtonComponent = ({ title, onPress }: ButtonProps) => {
     return (
         <TouchableOpacity onPress={onPress} style={styles.button} >
-            <Text style={StyleGlobal.textTitleContent}>{title}</Text>
+            <Text style={[StyleGlobal.textTitleContent, { color: appColor.text}]}>{title}</Text>
         </TouchableOpacity>
 
     )
