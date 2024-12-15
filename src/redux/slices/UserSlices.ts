@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 const initialState = {
     user: null,
-    loading: false,
+    loading: true,
     error: null as string | null,
 };
 // Hàm lấy danh sách user ID đã được follow
@@ -25,7 +25,7 @@ const getUserId = async ({ currentUserId }: any) => {
         where("id", "==", currentUserId)
     );
     const userSnapshot = await getDocs(userQuery);
-    console.log('userSnapshot', userSnapshot);
+    //console.log('userSnapshot', userSnapshot);
 
     if (!userSnapshot.empty) {
         // Trả về id của tài liệu đầu tiên
@@ -75,6 +75,25 @@ export const listenToUserRealtime = (id: any) => (dispatch: any) => {
 
     return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
 };
+// update noodle
+// Tạo async thunk để cập nhật dữ liệu Firestore
+export const updateUser = createAsyncThunk(
+    "data/upDateUser",
+    async ({ id, cupNoodles }: { id: string, cupNoodles: number }) => {
+        try {
+            if (!id) {
+                throw new Error("User ID is required.");
+            }
+
+            const userDocRef = doc(collection(db, "User"), id);
+            await updateDoc(userDocRef, { cupNoodles });
+            console.log("User updated!");
+
+        } catch (error) {
+            console.error("Error updating user:", error);
+        }
+    }
+);
 export const UserSlices = createSlice({
     name: "user",
     initialState,
@@ -82,6 +101,10 @@ export const UserSlices = createSlice({
         setUser: (state, action) => {
             state.user = action.payload;
             state.error = null; // Reset lỗi khi có dữ liệu người dùng mới
+            state.loading = false;
+        },
+        setLoading(state, action) {
+            state.loading = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -99,5 +122,5 @@ export const UserSlices = createSlice({
             });
     },
 });
-export const { setUser } = UserSlices.actions;
+export const { setUser, setLoading } = UserSlices.actions;
 export default UserSlices.reducer;

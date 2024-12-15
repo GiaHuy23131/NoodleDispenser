@@ -12,7 +12,9 @@
     "@react-navigation/native": "^7.0.13",
     "@react-navigation/stack": "^7.0.18",
     "@reduxjs/toolkit": "^2.5.0",
+    "@rneui/themed": "^4.0.0-rc.8",
     "@shopify/react-native-skia": "^1.7.0",
+    "@types/react-native": "^0.72.8",
     "expo": "~52.0.17",
     "expo-camera": "~16.0.9",
     "expo-status-bar": "~2.0.0",
@@ -33,7 +35,6 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
-    "@types/react-native": "^0.72.8",
     "typescript": "^5.3.3"
   },
   "private": true

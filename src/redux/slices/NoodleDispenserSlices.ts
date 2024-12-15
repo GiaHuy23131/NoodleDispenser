@@ -41,6 +41,23 @@ export const listenToNoodleDispenserRealtime = () => (dispatch: any) => {
 
     return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
 };
+export const updateNoodleDispenser = createAsyncThunk(
+    "data/upDateUser",
+    async ({ id, noodleQuatity }: { id: string, noodleQuatity: number }) => {
+        try {
+            if (!id) {
+                throw new Error("User ID is required.");
+            }
+
+            const userDocRef = doc(collection(db, "NoodleDispenser"), id);
+            await updateDoc(userDocRef, { noodleQuatity });
+            console.log("User updated!");
+
+        } catch (error) {
+            console.error("Error updating user:", error);
+        }
+    }
+);
 export const NoodleDispenserSlices = createSlice({
     name: "noodleDispenser",
     initialState,
