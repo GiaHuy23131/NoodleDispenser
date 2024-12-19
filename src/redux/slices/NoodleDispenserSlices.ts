@@ -20,16 +20,16 @@ const initialState = {
 };
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
 export const listenToNoodleDispenserRealtime = () => (dispatch: any) => {
-    const q = query(collection(db, "NoodleDispenser"));
+    const q = query(collection(db, "NoodleDispenser"),where("id", "==", "NoodleDispenser"));
 
     const unsubscribe = onSnapshot(
         q,
         (querySnapshot) => {
             if (!querySnapshot.empty) {
-                const noodleDispensers = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+                const noodleDispensers = {
+                    id: querySnapshot.docs[0].id,
+                    ...querySnapshot.docs[0].data(),
+                };
                 console.log('noodleDispensers',noodleDispensers);
                 dispatch(setNoodleDispenser(noodleDispensers));
             }

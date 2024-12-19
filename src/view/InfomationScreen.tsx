@@ -5,6 +5,22 @@ import { RootStackParamList } from '../navigator/StackNavigator';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useSelector } from "react-redux";
 import { useAppDispatch } from '../redux/hooks/hooks';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { db } from '../firebase/FireBaseConfig';
+import {
+    collection,
+    addDoc,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    updateDoc,
+    onSnapshot,
+    orderBy,
+} from "firebase/firestore";
 //redux
 import { listenToUserRealtime, setLoading, updateUser } from '../redux/slices/UserSlices';
 import { updateNoodleDispenser } from '../redux/slices/NoodleDispenserSlices';
@@ -36,15 +52,8 @@ const InfomationScreen = () => {
     const navigation = useNavigation<Stack>();
     //route
     const route = useRoute<DataRouteProp>();
-    const userId = route.params;
+    const userId: any = route.params;
     // console.log('userId', userId);
-
-    //data
-    const user = useSelector((state: any) => state.user.user);
-    const loading = useSelector((state: any) => state.user.loading);
-    const noodleDispenser = useSelector((state: any) => state.noodleDispenser.noodleDispenser);
-    const [loadingImages, setLoadingImages] = useState(true);
-    // console.log('loading', loading);
     useEffect(() => {
         if (userId) {
             // dispatch(setLoading(true));
@@ -53,6 +62,13 @@ const InfomationScreen = () => {
             return () => unsubscribe();
         }
     }, [userId]);
+    //data
+    const user = useSelector((state: any) => state.user.user);
+    const loading = useSelector((state: any) => state.user.loading);
+    const noodleDispenser = useSelector((state: any) => state.noodleDispenser.noodleDispenser);
+    const [loadingImages, setLoadingImages] = useState(true);
+    // console.log('loading', loading);
+
     useEffect(() => {
         // Tải hình ảnh và theo dõi trạng thái
         const prefetchImages = async () => {
@@ -75,9 +91,44 @@ const InfomationScreen = () => {
 
         prefetchImages();
     }, []);
+    //reset noolde
+    useEffect(() => {
+        const checkAndResetValue = async () => {
+            const now = new Date();
+            const nowVietNamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000); // Cộng 7 giờ vào giờ Việt Nam
+            const lastReset = await AsyncStorage.getItem('lastReset'); // Lấy giá trị lastReset từ AsyncStorage
+            if (lastReset) {
+                const lastResetDate = new Date(lastReset); // Chuyển thành đối tượng Date từ chuỗi ISO
+                const vietnamTime = new Date(lastResetDate.getTime() + 7 * 60 * 60 * 1000); // Cộng 7 giờ vào giờ Việt Nam
+
+                // console.log('vietnamTime:', vietnamTime.getMonth());
+                // console.log('nowVietNamTime:', nowVietNamTime.getMonth());
+
+                if (vietnamTime.getFullYear() !== nowVietNamTime.getFullYear() || vietnamTime.getMonth() !== nowVietNamTime.getMonth()) {
+                    console.log('reset');
+                    // Reset giá trị
+                    await dispatch(updateUser({ id: userId, cupNoodles: 3 }));
+
+                    await AsyncStorage.setItem('lastReset', now.toISOString()); // Lưu lại thời gian mới
+                } else {
+                    console.log('No reset required. Time difference is less than 1 month');
+                }
+            } else {
+                await AsyncStorage.setItem('lastReset', now.toISOString()); // Lưu lại thời gian mới
+            }
+        };
+
+        // Kiểm tra ngay khi component được mount
+        checkAndResetValue();
+
+        // Thiết lập interval để kiểm tra mỗi 1 ngày
+        const interval = setInterval(checkAndResetValue, 24 * 60 * 60 * 1000); // 1 ngày
+
+        // Cleanup interval khi component unmount
+        return () => clearInterval(interval);
+    }, []);
+
     // Lấy ảnh từ cupNoodles
-    // const fixedImages = cupNoodles.slice(0, user?.cupNoodles);
-    // console.log('fixedImages', fixedImages);
     const numberOfImages = Math.min(user?.cupNoodles || 0, 3);  // Giới hạn số lượng hình ảnh không vượt quá 3
     const cupNoodlesWithDefault = [
         ...cupNoodles.slice(0, numberOfImages),
@@ -99,7 +150,7 @@ const InfomationScreen = () => {
     }
 
     const handleCupNoodle = (id: string, totalNoodles: number) => {
-        if (noodleDispenser[0].noodleQuatity < selectedIndex.length) {
+        if (noodleDispenser?.noodleQuatity < selectedIndex.length) {
             navigation.navigate("OutofNoodlesScreen");
             return;
         }
@@ -107,7 +158,7 @@ const InfomationScreen = () => {
         console.log('totalCupsNoodles', cupNoodles);
         //cập nhật mì
         dispatch(updateUser({ id: id, cupNoodles: cupNoodles }));
-        dispatch(updateNoodleDispenser({id : noodleDispenser[0].id, noodleQuatity: noodleDispenser[0].noodleQuatity - selectedIndex.length}))
+        dispatch(updateNoodleDispenser({ id: noodleDispenser?.id, noodleQuatity: noodleDispenser?.noodleQuatity - selectedIndex.length }))
         setSelectedIndex([]);
         navigation.navigate("NotificationScreen");
 
@@ -117,7 +168,7 @@ const InfomationScreen = () => {
     // console.log('parsedData', parsedData);
 
     // console.log('user', user);
-    console.log('selectedIndex', selectedIndex);
+    //console.log('selectedIndex', selectedIndex);
 
 
     return (
@@ -133,7 +184,7 @@ const InfomationScreen = () => {
                         <View style={styles.frame}>
                             <Image width={100} height={100} borderRadius={90}
                                 source={{ uri: user?.image }} />
-                            <View style={{ marginLeft: '7%' }}>
+                            <View style={{ marginLeft: '4%' }}>
                                 <View style={{ marginBottom: '10%' }}>
                                     <Text style={[StyleGlobal.textContent, { color: appColor.radial }]}>Full Name: </Text>
                                 </View>
@@ -150,21 +201,21 @@ const InfomationScreen = () => {
 
                                 </View>
                             </View>
-                            <View style={{ marginLeft: '5%' }}>
+                            <View style={{ marginLeft: '2%' }}>
                                 <View style={{ marginBottom: '10%' }}>
-                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.full_name} </Text>
+                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.full_name.length > 15 ? user?.full_name.slice(0, 15) + '...' : user?.full_name} </Text>
 
                                 </View>
                                 <View style={{ marginBottom: '10%' }}>
-                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.birthday} </Text>
+                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.birthday.length > 10 ? user?.birthday.slice(0, 10) : user?.birthday} </Text>
 
                                 </View>
                                 <View style={{ marginBottom: '10%' }}>
-                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.gender} </Text>
+                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.gender.length > 5 ? user?.gender.slice(0, 5) : user?.gender} </Text>
 
                                 </View>
                                 <View style={{ marginBottom: '10%' }}>
-                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.department} </Text>
+                                    <Text style={[StyleGlobal.text, { color: '#880B0B' }]}>{user?.department.length > 15 ? user?.department.slice(0, 15) + '...' : user?.department} </Text>
 
                                 </View>
                             </View>

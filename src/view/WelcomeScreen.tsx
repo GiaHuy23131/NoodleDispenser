@@ -36,7 +36,6 @@ const WelcomeScreen = () => {
     const [cameraVisible, setCameraVisible] = useState(false);
     const [loadingImages, setLoadingImages] = useState(true);
     const [idCheck, setIdCheck] = useState(false);
-    const [value, setValue] = useState(3);
 
     useEffect(() => {
         const unsubscribe = listenToNoodleDispenserRealtime()(dispatch);
@@ -66,7 +65,7 @@ const WelcomeScreen = () => {
         prefetchImages();
     }, []);
     const noodleDispenser = useSelector((state: any) => state.noodleDispenser.noodleDispenser);
-    // console.log('noodleDispenser', noodleDispenser[0]?.noodleQuatity);
+    // console.log('noodleDispenser', noodleDispenser?.noodleQuatity);
 
     const player = useVideoPlayer(videoSource, player => {
         player.loop = true;
@@ -111,7 +110,7 @@ const WelcomeScreen = () => {
                 setIdCheck(true);
                 return;
             }
-            if (noodleDispenser[0].noodleQuatity > 0) {
+            if (noodleDispenser?.noodleQuatity > 0) {
                 setIdCheck(false);
                 dispatch(addUser(user))
                     .unwrap()
@@ -126,8 +125,6 @@ const WelcomeScreen = () => {
             console.error("Barcode scan error:", error);
         }
     };
-    
-    
     return (
         cameraVisible ? (
             <>

@@ -15,6 +15,6 @@ export const StyleGlobal = StyleSheet.create({
         fontWeight: 'bold',
     },
     text: {
-        fontSize: 16,
+        fontSize: 15,
     },
 });

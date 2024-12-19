@@ -15,14 +15,14 @@ const outOfNoodles = 'https://firebasestorage.googleapis.com/v0/b/terrianfirefly
 const OutofNoodlesScreen = () => {
     //route
     const noodleDispenser = useSelector((state: any) => state.noodleDispenser.noodleDispenser);
-    console.log('noodleQuatity', noodleDispenser[0].noodleQuatity);
+    // console.log('noodleQuatity', noodleDispenser.noodleQuatity);
 
     return (
         <BackgroundComponent>
             <View style={styles.container}>
                 <LogoComponent title='OUT OF NOODLES' />
                 <Text style={[StyleGlobal.textTitleContent, { textAlign: 'left', flexWrap: 'wrap', marginBottom: appInfo.heightWindows * 0.05, color: appColor.unavailable }]}>
-                    There is <Text style={{ color: appColor.white }}>{noodleDispenser[0].noodleQuatity}</Text> cup of noodles left in the machine. Please fill in to continue.
+                    There is <Text style={{ color: appColor.white }}>{noodleDispenser?.noodleQuatity}</Text> cup of noodles left in the machine. Please fill in to continue.
                 </Text>
                 <Image width={appInfo.widthWindows * 0.65} height={appInfo.heightWindows * 0.2} source={{ uri: outOfNoodles }} />
             </View>
